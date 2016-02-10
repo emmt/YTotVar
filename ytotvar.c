@@ -5,9 +5,10 @@
  *
  *-----------------------------------------------------------------------------
  *
- * Copyright (C) 2010-2014, Éric Thiébaut <eric.thiebaut@univ-lyon1.fr>,
+ * Copyright (C) 2010-2016, Éric Thiébaut <eric.thiebaut@univ-lyon1.fr>,
  *                          Loïc Denis <loic.denis@univ-st-etienne.fr>,
- *                          Ferréol Soulez <ferreol.soulez@univ-lyon1.fr>
+ *                          Ferréol Soulez <ferreol.soulez@univ-lyon1.fr>,
+ *                          Fabien Momey <fabien.momey@gmail.com>
  *
  * This software is governed by the CeCILL-C license under French law and
  * abiding by the rules of distribution of free software.  You can use, modify
@@ -49,10 +50,10 @@ extern void Y_rgl_totvar(int nargs);
 
 void Y_rgl_totvar(int nargs)
 {
-  double w1, w2, w3;
+  double w1, w2, w3, w4;
   double threshold, fx;
   double *x, *gx, *w;
-  long dims[Y_DIMSIZE], index, nw, n1, n2, n3, gx_index;
+  long dims[Y_DIMSIZE], index, nw, n1, n2, n3, n4, gx_index;
   unsigned int flags;
   int iarg, rank;
   static long options_index = -1L;
@@ -69,9 +70,9 @@ void Y_rgl_totvar(int nargs)
   nw = -1;
   flags = 0;
   rank = 0;
-  w1 = w2 = w3 = 1.0;
+  w1 = w2 = w3 = w4 = 1.0;
   threshold = 1E-9;
-  n1 = n2 = n3 = 0;
+  n1 = n2 = n3 = n4 = 0;
   gx_index = -1L;
 
   for (iarg = nargs - 1; iarg >= 0; --iarg) {
@@ -108,8 +109,13 @@ void Y_rgl_totvar(int nargs)
         n1 = dims[1];
         n2 = dims[2];
         n3 = dims[3];
+      } else if (rank == 4) {
+        n1 = dims[1];
+        n2 = dims[2];
+        n3 = dims[3];
+        n4 = dims[4];
       } else {
-        y_error("array X must have 2 or 3 dimensions");
+        y_error("array X must have 2, 3 or 4 dimensions");
       }
     } else if (gx_index < 0L) {
       gx_index =  yget_ref(iarg);
@@ -138,7 +144,7 @@ void Y_rgl_totvar(int nargs)
         w1 = w[0];
         w2 = w[1];
       }
-    } else /* rank = 3 */ {
+    } else if (rank ==3) {
       if (nw == 0) {
         w1 = w2 = w3 = w[0];
       } else {
@@ -146,8 +152,17 @@ void Y_rgl_totvar(int nargs)
         w2 = w[1];
         w3 = w[2];
       }
+    } else /* rank = 4 */ {
+      if (nw == 0) {
+        w1 = w2 = w3 = w4 = w[0];
+      } else {
+        w1 = w[0];
+        w2 = w[1];
+        w3 = w[2];
+        w4 = w[3];
+      }
     }
-    if (w1 < 0.0 || w2 < 0.0 || w3 < 0.0) {
+    if (w1 < 0.0 || w2 < 0.0 || w3 < 0.0 || w4 < 0.0) {
       y_error("weights must all be non-negative");
     }
   }
@@ -159,14 +174,17 @@ void Y_rgl_totvar(int nargs)
     dims[1] = n1;
     dims[2] = n2;
     dims[3] = n3;
+    dims[4] = n4;
     gx = ypush_d(dims);
   } else {
     gx = NULL;
   }
   if (rank == 2) {
     fx = rgl_tv2d(x, n1, n2, w1, w2, threshold, gx, flags);
-  } else  /* rank = 3 */ {
+  } else if (rank == 3) {
     fx = rgl_tv3d(x, n1, n2, n3, w1, w2, w3, threshold, gx, flags);
+  } else /* rank = 4 */ {
+    fx = rgl_tv4d(x, n1, n2, n3, n4, w1, w2, w3, w4, threshold, gx, flags);
   }
   if (fx == -1.0) {
     y_error("bug in rgl_totvar");

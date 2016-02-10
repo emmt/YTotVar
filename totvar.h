@@ -5,9 +5,10 @@
  *
  *-----------------------------------------------------------------------------
  *
- * Copyright (C) 2010-2014, Éric Thiébaut <eric.thiebaut@univ-lyon1.fr>,
+ * Copyright (C) 2010-2016, Éric Thiébaut <eric.thiebaut@univ-lyon1.fr>,
  *                          Loïc Denis <loic.denis@univ-st-etienne.fr>,
- *                          Ferréol Soulez <ferreol.soulez@univ-lyon1.fr>
+ *                          Ferréol Soulez <ferreol.soulez@univ-lyon1.fr>,
+ *                          Fabien Momey <fabien.momey@gmail.com>
  *
  * This software is governed by the CeCILL-C license under French law and
  * abiding by the rules of distribution of free software.  You can use, modify
@@ -66,6 +67,14 @@ extern double rgl_tv2d(const double x[],
 extern double rgl_tv3d(const double x[],
                        const long n1, const long n2, const long n3,
                        const double w1, const double w2, const double w3,
+                       const double eps, double gx[],
+                       unsigned int flags);
+
+extern double rgl_tv4d(const double x[],
+                       const long n1, const long n2,
+                       const long n3, const long n4,
+                       const double w1, const double w2,
+                       const double w3, const double w4,
                        const double eps, double gx[],
                        unsigned int flags);
 
