@@ -43,7 +43,7 @@ PKG_I_START=
 # non-pkg.i include files for this package, if any
 PKG_I_EXTRA=
 
-RELEASE_FILES = AUTHORS LICENSE Makefile NEWS README TODO \
+RELEASE_FILES = AUTHORS LICENSE Makefile NEWS README.md TODO \
 	configure totvar.c totvar.h totvar.i ytotvar.c
 RELEASE_NAME = $(PKG_NAME)-$(RELEASE_VERSION).tar.bz2
 
