@@ -45,7 +45,7 @@ PKG_I_EXTRA=
 
 RELEASE_FILES = AUTHORS LICENSE Makefile NEWS README.md TODO \
 	configure totvar.c totvar.h totvar.i ytotvar.c
-RELEASE_NAME = $(PKG_NAME)-$(RELEASE_VERSION).tar.bz2
+RELEASE_NAME = y$(PKG_NAME)-$(RELEASE_VERSION).tar.bz2
 
 # -------------------------------- standard targets and rules (in Makepkg)
 
@@ -109,9 +109,10 @@ $(RELEASE_NAME):
 	    echo >&2 "directory $$dir already exists"; \
 	  else \
 	    mkdir -p "$$dir"; \
-	    for src in $(RELEASE_FILES); do \
-	      dst="$$dir/$$src"; \
-	      if test "$$src" = "Makefile"; then \
+	    for file in $(RELEASE_FILES); do \
+              src="${srcdir}/$$file"; \
+	      dst="$$dir/$$file"; \
+	      if test "$$file" = "Makefile"; then \
 	        sed <"$$src" >"$$dst" -e 's/^\( *Y_\(MAKEDIR\|EXE\(\|_PKGS\|_HOME\|_SITE\)\|HOME_PKG\) *=\).*/\1/'; \
 	        touch -r "$$src" "$$dst"; \
 	      else \
