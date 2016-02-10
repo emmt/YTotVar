@@ -93,3 +93,52 @@ RGL_TOTVAR_ISOTROPIC    = 0;
 RGL_TOTVAR_FORWARD      = 1;
 RGL_TOTVAR_ALTERNATIVE  = 2;
 RGL_TOTVAR_SEPARABLE    = 3;
+
+extern _rgl_mixed_3dpt;
+/* PROTOTYPE
+   double mixed_regul_3dpt(double, double, double, double,
+                           long, long, long, long,
+                           double array, pointer,
+                           int);
+*/
+
+func rgl_mixed_3dpt(args)
+/* DOCUMENT rgl_mixed_3dpt(mu1, eps1, mu2, eps2, x);
+         or rgl_mixed_3dpt(mu1, eps1, mu2, eps2, x, g, clr);
+
+   SEE ALSO:
+ */
+{
+  local mu1, eps1, mu2, eps2, x, g, clr;
+  nargs = args(0);
+  if (nargs < 5 || nargs > 7) {
+    error, "bad number of aruments";
+  }
+  eq_nocopy, mu1,  args(1);
+  eq_nocopy, eps1, args(2);
+  eq_nocopy, mu2,  args(3);
+  eq_nocopy, eps2, args(4);
+  eq_nocopy, x,    args(5);
+  dims = dimsof(x);
+  rank = numberof(dims) - 1;
+  if (rank != 4 || structof(x) != double) {
+    error, "expecting 4-D array of double precision reals";
+  }
+  if (mu1 < 0 || eps1 <= 0 || mu2 < 0 || eps2 <=0) {
+    error, "illegal parameters";
+  }
+  clr = (nargs < 7 ? 0n : !(!args(7)));
+  if (nargs >= 6) {
+    eq_nocopy, g, args(6);
+    gdims = dimsof(g);
+    if (structof(g) != double || numberof(gdims) != numberof(dims)
+        || anyof(gdims != dims)) {
+      g = array(double, dims);
+      args, 6, g;
+    }
+  }
+  return _rgl_mixed_3dpt(mu1, eps1, mu2, eps2,
+                         dims(2), dims(3), dims(4), dims(5),
+                         x, &g, 0n);
+}
+wrap_args, rgl_mixed_3dpt;

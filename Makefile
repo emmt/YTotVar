@@ -20,7 +20,7 @@ TGT=$(DEFAULT_TGT)
 PKG_NAME=totvar
 PKG_I=${srcdir}/totvar.i
 
-OBJS=totvar.o ytotvar.o
+OBJS=totvar.o ytotvar.o mixed.o
 
 # change to give the executable a name other than yorick
 PKG_EXENAME=yorick
@@ -44,7 +44,7 @@ PKG_I_START=
 PKG_I_EXTRA=
 
 RELEASE_FILES = AUTHORS LICENSE Makefile NEWS README.md TODO \
-	configure totvar.c totvar.h totvar.i ytotvar.c
+	configure totvar.c totvar.h totvar.i ytotvar.c mixed.c
 RELEASE_NAME = y$(PKG_NAME)-$(RELEASE_VERSION).tar.bz2
 
 # -------------------------------- standard targets and rules (in Makepkg)
