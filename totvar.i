@@ -135,6 +135,7 @@ func rgl_mixed_3dpt(args)
         || anyof(gdims != dims)) {
       g = array(double, dims);
       args, 6, g;
+      clr = 0n;
     }
   }
   return _rgl_mixed_3dpt(mu1, eps1, mu2, eps2,
