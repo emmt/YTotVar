@@ -94,17 +94,21 @@ RGL_TOTVAR_FORWARD      = 1;
 RGL_TOTVAR_ALTERNATIVE  = 2;
 RGL_TOTVAR_SEPARABLE    = 3;
 
+extern _rgl_mixed_2dpt;
+/* PROTOTYPE
+   double mixed_regul_2dpt(double, double, double, double,
+                           long, long, long,
+                           double array, pointer, int); */
+
 extern _rgl_mixed_3dpt;
 /* PROTOTYPE
    double mixed_regul_3dpt(double, double, double, double,
                            long, long, long, long,
-                           double array, pointer,
-                           int);
-*/
+                           double array, pointer, int); */
 
-func rgl_mixed_3dpt(args)
-/* DOCUMENT rgl_mixed_3dpt(mu1, eps1, mu2, eps2, x);
-         or rgl_mixed_3dpt(mu1, eps1, mu2, eps2, x, g, clr);
+func rgl_mixed_ndpt(args)
+/* DOCUMENT rgl_mixed_ndpt(mu1, eps1, mu2, eps2, x);
+         or rgl_mixed_ndpt(mu1, eps1, mu2, eps2, x, g, clr);
 
    SEE ALSO:
  */
@@ -112,7 +116,7 @@ func rgl_mixed_3dpt(args)
   local mu1, eps1, mu2, eps2, x, g, clr;
   nargs = args(0);
   if (nargs < 5 || nargs > 7) {
-    error, "bad number of aruments";
+    error, "bad number of arguments";
   }
   eq_nocopy, mu1,  args(1);
   eq_nocopy, eps1, args(2);
@@ -121,8 +125,8 @@ func rgl_mixed_3dpt(args)
   eq_nocopy, x,    args(5);
   dims = dimsof(x);
   rank = numberof(dims) - 1;
-  if (rank != 4 || structof(x) != double) {
-    error, "expecting 4-D array of double precision reals";
+  if (rank < 3 || rank > 4 || structof(x) != double) {
+    error, "expecting 3-D or 4-D array of double precision reals";
   }
   if (mu1 < 0 || eps1 <= 0 || mu2 < 0 || eps2 <=0) {
     error, "illegal parameters";
@@ -138,8 +142,15 @@ func rgl_mixed_3dpt(args)
       clr = 0n;
     }
   }
-  return _rgl_mixed_3dpt(mu1, eps1, mu2, eps2,
-                         dims(2), dims(3), dims(4), dims(5),
-                         x, &g, 0n);
+  if (rank == 3) {
+    return _rgl_mixed_2dpt(mu1, eps1, mu2, eps2,
+                           dims(2), dims(3), dims(4),
+                           x, &g, 0n);
+  } else if (rank == 4) {
+    return _rgl_mixed_3dpt(mu1, eps1, mu2, eps2,
+                           dims(2), dims(3), dims(4), dims(5),
+                           x, &g, 0n);
+  }
 }
-wrap_args, rgl_mixed_3dpt;
+wrap_args, rgl_mixed_ndpt;
+
