@@ -194,15 +194,3 @@ void Y_rgl_totvar(int nargs)
   }
   ypush_double(fx);
 }
-
-/*
- * Local Variables:
- * mode: C
- * tab-width: 8
- * indent-tabs-mode: nil
- * c-basic-offset: 2
- * fill-column: 78
- * coding: utf-8
- * ispell-local-dictionary: "american"
- * End:
- */

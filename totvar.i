@@ -5,9 +5,10 @@
  *
  *-----------------------------------------------------------------------------
  *
- * Copyright (C) 2010-2014, Éric Thiébaut <eric.thiebaut@univ-lyon1.fr>,
+ * Copyright (C) 2010-2016, Éric Thiébaut <eric.thiebaut@univ-lyon1.fr>,
  *                          Loïc Denis <loic.denis@univ-st-etienne.fr>,
- *                          Ferréol Soulez <ferreol.soulez@univ-lyon1.fr>
+ *                          Ferréol Soulez <ferreol.soulez@univ-lyon1.fr>,
+ *                          Fabien Momey <fabien.momey@gmail.com>
  *
  * This software is governed by the CeCILL-C license under French law and
  * abiding by the rules of distribution of free software.  You can use, modify
@@ -45,9 +46,9 @@ extern rgl_totvar;
 /* DOCUMENT rgl_totvar(x)
          or rgl_totvar(x, gx)
 
-     This function returns the Total Variation (TV) cost for the, 2-D or 3-D,
-     array X.  Optional argument GX is an output variable used to store the
-     partial derivatives of the cost function; if GX is not specified, the
+     This function returns the Total Variation (TV) cost for the, 2-D, 3-D or
+     4-D, array X.  Optional argument GX is an output variable used to store
+     the partial derivatives of the cost function; if GX is not specified, the
      partial derivatives are not computed.
 
      The cost is (the sum over every locations of):
@@ -92,15 +93,3 @@ RGL_TOTVAR_ISOTROPIC    = 0;
 RGL_TOTVAR_FORWARD      = 1;
 RGL_TOTVAR_ALTERNATIVE  = 2;
 RGL_TOTVAR_SEPARABLE    = 3;
-
-/*
- * Local Variables:
- * mode: Yorick
- * tab-width: 8
- * indent-tabs-mode: nil
- * c-basic-offset: 2
- * fill-column: 78
- * coding: utf-8
- * ispell-local-dictionary: "american"
- * End:
- */
