@@ -110,6 +110,35 @@ func rgl_mixed_ndpt(args)
 /* DOCUMENT rgl_mixed_ndpt(mu1, eps1, mu2, eps2, x);
          or rgl_mixed_ndpt(mu1, eps1, mu2, eps2, x, g, clr);
 
+     Compute N-D + t edge-preserving regularization on array X.  The second
+     form is to increment the contents of array G with the gradient (if
+     optional argument CLR is true, the G is first filled with zeros).
+
+     The regularization cost is given by:
+
+         f(x) =   mu1*sum(sqrt(||xgrd1||^2 + eps1^2) - eps1)
+                + mu2*sum(sqrt(||xgrd2||^2 + eps2^2) - eps2);
+
+     where ||xgrd1|| is (an estimate of) the Euclidean norm of the gradient of
+     X along its leading dimensions, while ||xgrd2|| is (an estimate of) the
+     Euclidean norm of the gradient of X along its last dimension.
+
+     More specifically (assuming X is a 3D array):
+
+         ||xgrd1|| = sqrt(((x(i,i,) - x(i,j,))^2 + (x(j,i,) - x(j,j,))^2)/2 +
+                          ((x(i,i,) - x(j,i,))^2 + (x(i,j,) - x(j,j,))^2)/2);
+         ||xgrd2|| = abs(x(..,dif));
+
+     where i = 1:-1 and j = 2:0 (using Yorick range notation).  In other
+     words, the implemented regularization consider jointly the elading
+     dimension and separately the trailing one.
+
+     The substraction of EPS1 and EPS2 is to insure that the minimum possible
+     value of f(x) is zero.  The weights MU1 and MU2 must be nonnegative, the
+     thresholds ESP1 and EPS2 must be strictly positive.
+
+
+
    SEE ALSO:
  */
 {
