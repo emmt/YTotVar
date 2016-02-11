@@ -131,25 +131,23 @@ func rgl_mixed_ndpt(args)
   if (mu1 < 0 || eps1 <= 0 || mu2 < 0 || eps2 <=0) {
     error, "illegal parameters";
   }
-  clr = (nargs < 7 ? 0n : !(!args(7)));
+  clr = (nargs >= 7 && args(7));
   if (nargs >= 6) {
     eq_nocopy, g, args(6);
     gdims = dimsof(g);
     if (structof(g) != double || numberof(gdims) != numberof(dims)
         || anyof(gdims != dims)) {
-      g = array(double, dims);
-      args, 6, g;
-      clr = 0n;
+      error, "bad array G";
     }
   }
   if (rank == 3) {
     return _rgl_mixed_2dpt(mu1, eps1, mu2, eps2,
                            dims(2), dims(3), dims(4),
-                           x, &g, 0n);
+                           x, &g, clr);
   } else if (rank == 4) {
     return _rgl_mixed_3dpt(mu1, eps1, mu2, eps2,
                            dims(2), dims(3), dims(4), dims(5),
-                           x, &g, 0n);
+                           x, &g, clr);
   }
 }
 wrap_args, rgl_mixed_ndpt;
