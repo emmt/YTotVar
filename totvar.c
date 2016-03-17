@@ -1174,7 +1174,7 @@ double rgl_tv4d(const double x[],
               x2 = x[j2];
               x4 = x[j4];
               x6 = x[j6];
-              x8 = x[8];
+              x8 = x[j8];
               x10 = x[j10];
               x12 = x[j12];
               x14 = x[j14];
@@ -1230,9 +1230,9 @@ double rgl_tv4d(const double x[],
                 y816 = x8 - x16;
 
                 /* Compute the cost and integrate its gradient. */
-                r = (SQ(y12) + SQ(y34) + SQ(y56) + SQ(y78) + SQ(910) + SQ(1112) + SQ(1314) + SQ(1516) +
-                     SQ(y13) + SQ(y24) + SQ(y57) + SQ(y68) + SQ(911) + SQ(1012) + SQ(1315) + SQ(1416) +
-                     SQ(y15) + SQ(y26) + SQ(y37) + SQ(y48) + SQ(913) + SQ(1014) + SQ(1115) + SQ(1216) +
+                r = (SQ(y12) + SQ(y34) + SQ(y56) + SQ(y78) + SQ(y910) + SQ(y1112) + SQ(y1314) + SQ(y1516) +
+                     SQ(y13) + SQ(y24) + SQ(y57) + SQ(y68) + SQ(y911) + SQ(y1012) + SQ(y1315) + SQ(y1416) +
+                     SQ(y15) + SQ(y26) + SQ(y37) + SQ(y48) + SQ(y913) + SQ(y1014) + SQ(y1115) + SQ(y1216) +
                      SQ(y19) + SQ(y210) + SQ(y311) + SQ(y412) + SQ(y513) + SQ(y614) + SQ(y715) + SQ(y816))*q;
                 p = sqrt(r + s);
                 fx += p;
@@ -1273,7 +1273,7 @@ double rgl_tv4d(const double x[],
               x2 = x[j2];
               x4 = x[j4];
               x6 = x[j6];
-              x8 = x[8];
+              x8 = x[j8];
               x10 = x[j10];
               x12 = x[j12];
               x14 = x[j14];
@@ -1329,9 +1329,9 @@ double rgl_tv4d(const double x[],
                 y816 = x8 - x16;
 
                 /* Compute the cost and integrate its gradient. */
-                r = (SQ(y12) + SQ(y34) + SQ(y56) + SQ(y78) + SQ(910) + SQ(1112) + SQ(1314) + SQ(1516) +
-                     SQ(y13) + SQ(y24) + SQ(y57) + SQ(y68) + SQ(911) + SQ(1012) + SQ(1315) + SQ(1416) +
-                     SQ(y15) + SQ(y26) + SQ(y37) + SQ(y48) + SQ(913) + SQ(1014) + SQ(1115) + SQ(1216) +
+                r = (SQ(y12) + SQ(y34) + SQ(y56) + SQ(y78) + SQ(y910) + SQ(y1112) + SQ(y1314) + SQ(y1516) +
+                     SQ(y13) + SQ(y24) + SQ(y57) + SQ(y68) + SQ(y911) + SQ(y1012) + SQ(y1315) + SQ(y1416) +
+                     SQ(y15) + SQ(y26) + SQ(y37) + SQ(y48) + SQ(y913) + SQ(y1014) + SQ(y1115) + SQ(y1216) +
                      SQ(y19) + SQ(y210) + SQ(y311) + SQ(y412) + SQ(y513) + SQ(y614) + SQ(y715) + SQ(y816))*q;
                 fx += sqrt(r + s);
               }
@@ -1360,7 +1360,7 @@ double rgl_tv4d(const double x[],
               x2 = x[j2];
               x4 = x[j4];
               x6 = x[j6];
-              x8 = x[8];
+              x8 = x[j8];
               x10 = x[j10];
               x12 = x[j12];
               x14 = x[j14];
@@ -1416,9 +1416,9 @@ double rgl_tv4d(const double x[],
                 y816 = x8 - x16;
 
                 /* Compute the cost and integrate its gradient. */
-                r = ((SQ(y12) + SQ(y34) + SQ(y56) + SQ(y78) + SQ(910) + SQ(1112) + SQ(1314) + SQ(1516))*q1 +
-                     (SQ(y13) + SQ(y24) + SQ(y57) + SQ(y68) + SQ(911) + SQ(1012) + SQ(1315) + SQ(1416))*q2 +
-                     (SQ(y15) + SQ(y26) + SQ(y37) + SQ(y48) + SQ(913) + SQ(1014) + SQ(1115) + SQ(1216))*q3 +
+                r = ((SQ(y12) + SQ(y34) + SQ(y56) + SQ(y78) + SQ(y910) + SQ(y1112) + SQ(y1314) + SQ(y1516))*q1 +
+                     (SQ(y13) + SQ(y24) + SQ(y57) + SQ(y68) + SQ(y911) + SQ(y1012) + SQ(y1315) + SQ(y1416))*q2 +
+                     (SQ(y15) + SQ(y26) + SQ(y37) + SQ(y48) + SQ(y913) + SQ(y1014) + SQ(y1115) + SQ(y1216))*q3 +
                      (SQ(y19) + SQ(y210) + SQ(y311) + SQ(y412) + SQ(y513) + SQ(y614) + SQ(y715) + SQ(y816))*q4);
                 r = sqrt(r + s);
                 fx += r;
@@ -1495,7 +1495,7 @@ double rgl_tv4d(const double x[],
               x2 = x[j2];
               x4 = x[j4];
               x6 = x[j6];
-              x8 = x[8];
+              x8 = x[j8];
               x10 = x[j10];
               x12 = x[j12];
               x14 = x[j14];
@@ -1551,9 +1551,9 @@ double rgl_tv4d(const double x[],
                 y816 = x8 - x16;
 
                 /* Compute the cost and integrate its gradient. */
-                r = ((SQ(y12) + SQ(y34) + SQ(y56) + SQ(y78) + SQ(910) + SQ(1112) + SQ(1314) + SQ(1516))*q1 +
-                     (SQ(y13) + SQ(y24) + SQ(y57) + SQ(y68) + SQ(911) + SQ(1012) + SQ(1315) + SQ(1416))*q2 +
-                     (SQ(y15) + SQ(y26) + SQ(y37) + SQ(y48) + SQ(913) + SQ(1014) + SQ(1115) + SQ(1216))*q3 +
+                r = ((SQ(y12) + SQ(y34) + SQ(y56) + SQ(y78) + SQ(y910) + SQ(y1112) + SQ(y1314) + SQ(y1516))*q1 +
+                     (SQ(y13) + SQ(y24) + SQ(y57) + SQ(y68) + SQ(y911) + SQ(y1012) + SQ(y1315) + SQ(y1416))*q2 +
+                     (SQ(y15) + SQ(y26) + SQ(y37) + SQ(y48) + SQ(y913) + SQ(y1014) + SQ(y1115) + SQ(y1216))*q3 +
                      (SQ(y19) + SQ(y210) + SQ(y311) + SQ(y412) + SQ(y513) + SQ(y614) + SQ(y715) + SQ(y816))*q4);
                 fx += sqrt(r + s);
               }
