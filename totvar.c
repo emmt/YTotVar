@@ -569,8 +569,10 @@ double rgl_tv2d_complex(const double xr[], const double xi[],
   fx = 0.0;
   s = eps*eps;
 
-#define  X(a1,a2)   x[OFF2(a1,a2)]
-#define GX(a1,a2)  gx[OFF2(a1,a2)]
+#define  XR(a1,a2)   xr[OFF2(a1,a2)]
+#define GXR(a1,a2)  gxr[OFF2(a1,a2)]
+#define  XI(a1,a2)   xi[OFF2(a1,a2)]
+#define GXI(a1,a2)  gxi[OFF2(a1,a2)]
 
   if (METHOD(flags, RGL_TOTVAR_FORWARD)) {
     /*
@@ -583,12 +585,12 @@ double rgl_tv2d_complex(const double xr[], const double xi[],
     if (compute_gradient) {
       if (w1 == w2) /* same weights along all directions */ {
         for (i2 = 1; i2 < n2; ++i2) {
-          x2r = xr(0, i2-1);
-          x2i = xi(0, i2-1);
+          x2r = XR(0, i2-1);
+          x2i = XI(0, i2-1);
           for (i1 = 1; i1 < n1; ++i1) {
             x1r = x2r;           x1i = x2i;
-            x2r = xr(i1, i2-1);  x2i = xi(i1, i2-1);
-            x3r = xr(i1-1, i2);  x3i = xi(i1-1, i2);
+            x2r = XR(i1, i2-1);  x2i = XI(i1, i2-1);
+            x3r = XR(i1-1, i2);  x3i = XI(i1-1, i2);
             y12r = x1r - x2r;    y12i = x1i - x2i;
             y13r = x1r - x3r;    y13i = x1i - x3i;
             r = (SQ(y12r) + SQ(y13r) + SQ(y12i) + SQ(y13i))*w1;
@@ -599,22 +601,22 @@ double rgl_tv2d_complex(const double xr[], const double xi[],
             y13r *= p;
             y12i *= p;
             y13i *= p;
-            gxr(i1 - 1, i2 - 1) += y12r + y13r; /* deriv. wrt X1 */
-            gxr(i1    , i2 - 1) -= y12r;       /* deriv. wrt X2 */
-            gxr(i1 - 1, i2    ) -= y13r;       /* deriv. wrt X3 */
-            gxi(i1 - 1, i2 - 1) += y12i + y13i; /* deriv. wrt X1 */
-            gxi(i1    , i2 - 1) -= y12i;       /* deriv. wrt X2 */
-            gxi(i1 - 1, i2    ) -= y13i;       /* deriv. wrt X3 */
+            GXR(i1 - 1, i2 - 1) += y12r + y13r; /* deriv. wrt X1 */
+            GXR(i1    , i2 - 1) -= y12r;       /* deriv. wrt X2 */
+            GXR(i1 - 1, i2    ) -= y13r;       /* deriv. wrt X3 */
+            GXI(i1 - 1, i2 - 1) += y12i + y13i; /* deriv. wrt X1 */
+            GXI(i1    , i2 - 1) -= y12i;       /* deriv. wrt X2 */
+            GXI(i1 - 1, i2    ) -= y13i;       /* deriv. wrt X3 */
           }
         }
       } else /* not same weights along all directions */ {
         for (i2 = 1; i2 < n2; ++i2) {
-          x2r = xr(0, i2-1);
-          x2i = xi(0, i2-1);
+          x2r = XR(0, i2-1);
+          x2i = XI(0, i2-1);
           for (i1 = 1; i1 < n1; ++i1) {
             x1r = x2r;           x1i = x2i;
-            x2r = xr(i1, i2-1);  x2i = xi(i1, i2-1);
-            x3r = xr(i1-1, i2);  x3i = xi(i1-1, i2);
+            x2r = XR(i1, i2-1);  x2i = XI(i1, i2-1);
+            x3r = XR(i1-1, i2);  x3i = XI(i1-1, i2);
             y12r = x1r - x2r;    y12i = x1i - x2i;
             y13r = x1r - x3r;    y13i = x1i - x3i;
             r = SQ(y12r)*w1 + SQ(y13r)*w2 + SQ(y12i)*w1 + SQ(y13i)*w2;
@@ -625,24 +627,24 @@ double rgl_tv2d_complex(const double xr[], const double xi[],
             y13r *= p*w2;
             y12i *= p*w1;
             y13i *= p*w2;
-            gxr(i1 - 1, i2 - 1) += y12r + y13r; /* deriv. wrt X1 */
-            gxr(i1    , i2 - 1) -= y12r;       /* deriv. wrt X2 */
-            gxr(i1 - 1, i2    ) -= y13r;       /* deriv. wrt X3 */
-            gxi(i1 - 1, i2 - 1) += y12i + y13i; /* deriv. wrt X1 */
-            gxi(i1    , i2 - 1) -= y12i;       /* deriv. wrt X2 */
-            gxi(i1 - 1, i2    ) -= y13i;       /* deriv. wrt X3 */
+            GXR(i1 - 1, i2 - 1) += y12r + y13r; /* deriv. wrt X1 */
+            GXR(i1    , i2 - 1) -= y12r;       /* deriv. wrt X2 */
+            GXR(i1 - 1, i2    ) -= y13r;       /* deriv. wrt X3 */
+            GXI(i1 - 1, i2 - 1) += y12i + y13i; /* deriv. wrt X1 */
+            GXI(i1    , i2 - 1) -= y12i;       /* deriv. wrt X2 */
+            GXI(i1 - 1, i2    ) -= y13i;       /* deriv. wrt X3 */
           }
         }
       }
     } else /* do not compute gradients */ {
       if (w1 == w2) /* same weights along all directions */ {
         for (i2 = 1; i2 < n2; ++i2) {
-          x2r = xr(0, i2-1);
-          x2i = xi(0, i2-1);
+          x2r = XR(0, i2-1);
+          x2i = XI(0, i2-1);
           for (i1 = 1; i1 < n1; ++i1) {
             x1r = x2r;           x1i = x2i;
-            x2r = xr(i1, i2-1);  x2i = xi(i1, i2-1);
-            x3r = xr(i1-1, i2);  x3i = xi(i1-1, i2);
+            x2r = XR(i1, i2-1);  x2i = XI(i1, i2-1);
+            x3r = XR(i1-1, i2);  x3i = XI(i1-1, i2);
             y12r = x1r - x2r;    y12i = x1i - x2i;
             y13r = x1r - x3r;    y13i = x1i - x3i;
             r = (SQ(y12r) + SQ(y13r) + SQ(y12i) + SQ(y13i))*w1;
@@ -651,12 +653,12 @@ double rgl_tv2d_complex(const double xr[], const double xi[],
         }
       } else /* not same weights along all directions */ {
         for (i2 = 1; i2 < n2; ++i2) {
-          x2r = xr(0, i2-1);
-          x2i = xi(0, i2-1);
+          x2r = XR(0, i2-1);
+          x2i = XI(0, i2-1);
           for (i1 = 1; i1 < n1; ++i1) {
             x1r = x2r;           x1i = x2i;
-            x2r = xr(i1, i2-1);  x2i = xi(i1, i2-1);
-            x3r = xr(i1-1, i2);  x3i = xi(i1-1, i2);
+            x2r = XR(i1, i2-1);  x2i = XI(i1, i2-1);
+            x3r = XR(i1-1, i2);  x3i = XI(i1-1, i2);
             y12r = x1r - x2r;    y12i = x1i - x2i;
             y13r = x1r - x3r;    y13i = x1i - x3i;
             r = SQ(y12r)*w1 + SQ(y13r)*w2 + SQ(y12i)*w1 + SQ(y13i)*w2;
