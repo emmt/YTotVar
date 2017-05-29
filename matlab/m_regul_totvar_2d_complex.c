@@ -62,16 +62,13 @@ void mexFunction( int nlhs1, mxArray *plhs[],
     nDims = mxGetNumberOfDimensions(prhs[0]);
     pDims = mxGetDimensions(prhs[0]);
     xr = mxGetPr(prhs[0]);
-    
-    nDims = mxGetNumberOfDimensions(prhs[1]);
-    pDims = mxGetDimensions(prhs[1]);
     xi = mxGetPr(prhs[1]);
     
     n1        = pDims[0];
     n2        = pDims[1];
 
     /* Display the inputs */
-    // mexPrintf("n1 = %d, n2 = %d, w1 = %f, w2 = %f, eps = %f, flags = %d\n", n1, n2, w1, w2, eps, flags);
+    /* mexPrintf("n1 = %d, n2 = %d, w1 = %f, w2 = %f, eps = %f, flags = %d\n", n1, n2, w1, w2, eps, flags); */
     
     /* Create the output arguments */
     /* Argument fx */

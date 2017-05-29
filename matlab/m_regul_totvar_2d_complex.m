@@ -3,7 +3,9 @@
 % 
 %  [fx, gxr, gxi] = m_regul_totvar_2d_complex(xr, xi, w1, w2, eps, flags);
 %                                       
-%  MexFile to call from Matlab the rgl_tv2d_complex function of the totvar library which implements Definitions for relaxed Total Variation (TV).
+%  MexFile to call from Matlab the rgl_tv2d_complex function of the totvar library 
+%  which implements Definitions for relaxed Total Variation (TV)
+%  for images with complex values.
 %  
 %  Compilation :
 %        mex m_regul_totvar_2d_complex.c totvar.o
