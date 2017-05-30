@@ -8,7 +8,7 @@
 %  for images with complex values.
 %  
 %  Compilation :
-%        mex m_regul_totvar_2d_complex.c totvar.o
+%        mex m_regul_totvar_2d_complex.c ../totvar.o (or totvar.obj)
 %   
 %  Mai 2017
 %  LaHC

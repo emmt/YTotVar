@@ -3,10 +3,12 @@
 
   [fx, gxr, gxi] = m_regul_totvar_3d_complex(xr, xi, w1, w2, w3, eps, flags);
                                       
-  MexFile to call from Matlab the rgl_tv3d function of the Totvar library.
+  MexFile to call from Matlab the rgl_tv3d function of the Totvar library
+  which implements Definitions for relaxed Total Variation (TV)
+  for images with complex values.
  
   Compilation :
-        mex m_regul_totvar_3d_complex.c totvar.obj
+        mex m_regul_totvar_3d_complex.c ../totvar.o (or totvar.obj)
   
   Juillet 2015
   CEA-LETI
@@ -15,7 +17,7 @@
 
 #include "matrix.h"
 #include "mex.h"
-#include "totvar.h"
+#include "../totvar.h"
 
 void mexFunction( int nlhs1, mxArray *plhs[],    
                   int nrhs, const mxArray *prhs[] )
@@ -34,7 +36,7 @@ void mexFunction( int nlhs1, mxArray *plhs[],
 
     /* Control of the number of inputs and outputs */ 
     if (nrhs > 7)
-        mexErrMsgTxt("10 input argument required."); 
+        mexErrMsgTxt("7 input argument required."); 
     else if (nlhs1 !=3) 
         mexErrMsgTxt("3 output argument required.");
     
@@ -65,8 +67,6 @@ void mexFunction( int nlhs1, mxArray *plhs[],
     pDims = mxGetDimensions(prhs[0]);
     xr = mxGetPr(prhs[0]);
     
-    nDims = mxGetNumberOfDimensions(prhs[1]);
-    pDims = mxGetDimensions(prhs[1]);
     xi = mxGetPr(prhs[1]);
     
     n1        = pDims[0];
@@ -74,7 +74,7 @@ void mexFunction( int nlhs1, mxArray *plhs[],
 	n3        = pDims[2];
 
     /* Display the inputs */
-    // mexPrintf("n1 = %d, n2 = %d, n3 = %d, w1 = %f, w2 = %f, w3 = %f, eps = %f, flags = %d\n", n1, n2, n3, w1, w2, w3, eps, flags);
+    /* mexPrintf("n1 = %d, n2 = %d, n3 = %d, w1 = %f, w2 = %f, w3 = %f, eps = %f, flags = %d\n", n1, n2, n3, w1, w2, w3, eps, flags); */
     
     /* Create the output arguments */
     /* Argument fx */

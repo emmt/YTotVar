@@ -3,10 +3,11 @@
 % 
 %  [fx, gx] = m_regul_totvar_3d(x, w1, w2, w3, eps, flags);
 %                                       
-%  MexFile to call from Matlab the rgl_tv3d function of the totvar library which implements Definitions for relaxed Total Variation (TV).
+%  MexFile to call from Matlab the rgl_tv3d function of the totvar library
+%  which implements Definitions for relaxed Total Variation (TV)
 %  
 %  Compilation :
-%        mex m_regul_totvar_3d.c totvar.obj
+%        mex m_regul_totvar_3d.c ../totvar.o (or totvar.obj)
 %   
 %  Juillet 2015
 %  CEA-LETI
@@ -16,9 +17,9 @@
 %  * Information about totvar library
 %  *-----------------------------------------------------------------------------
 %  *
-%  * Copyright (C) 2010-2014, Éric Thiébaut <eric.thiebaut@univ-lyon1.fr>,
-%  *                          Loïc Denis <loic.denis@univ-st-etienne.fr>,
-%  *                          Ferréol Soulez <ferreol.soulez@univ-lyon1.fr>
+%  * Copyright (C) 2010-2014, ï¿½ric Thiï¿½baut <eric.thiebaut@univ-lyon1.fr>,
+%  *                          Loï¿½c Denis <loic.denis@univ-st-etienne.fr>,
+%  *                          Ferrï¿½ol Soulez <ferreol.soulez@univ-lyon1.fr>
 %  *
 %  * This software is governed by the CeCILL-C license under French law and
 %  * abiding by the rules of distribution of free software.  You can use, modify
