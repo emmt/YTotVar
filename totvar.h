@@ -29,7 +29,7 @@
  * computer knowledge. Users are therefore encouraged to load and test the
  * software's suitability as regards their requirements in conditions enabling
  * the security of their systems and/or data to be ensured and, more
- * generally, to use and operate it in the same conditions as regards
+ * generally, to use and operate it in the conditions as regards
  * security.
  *
  * The fact that you are presently reading this means that you have had
@@ -64,10 +64,22 @@ extern double rgl_tv2d(const double x[],
                        const double eps, double gx[],
                        unsigned int flags);
 
+extern double rgl_tv2d_complex(const double xr[], const double xi[],
+                       const long n1, const long n2,
+                       const double w1, const double w2,
+                       const double eps, double gxr[], double gxi[],
+                       unsigned int flags);
+
 extern double rgl_tv3d(const double x[],
                        const long n1, const long n2, const long n3,
                        const double w1, const double w2, const double w3,
                        const double eps, double gx[],
+                       unsigned int flags);
+
+extern double rgl_tv3d_complex(const double xr[], const double xi[],
+                       const long n1, const long n2, const long n3,
+                       const double w1, const double w2, const double w3,
+                       const double eps, double gxr[], double gxi[],
                        unsigned int flags);
 
 extern double rgl_tv4d(const double x[],

@@ -544,6 +544,277 @@ double rgl_tv2d(const double x[], const long n1, const long n2,
   return fx;
 }
 
+double rgl_tv2d_complex(const double xr[], const double xi[],
+                       const long n1, const long n2,
+                       const double w1, const double w2,
+                       const double eps, double gxr[], double gxi[],
+                       unsigned int flags)
+{
+  const double ZERO = 0.0;
+  double x1r, x2r, x3r, x4r, y1r, y2r, y3r;
+  double x1i, x2i, x3i, x4i, y1i, y2i, y3i;
+  double p, r, s, fx;
+  long i1, i2, j1, j2, j3, j4;
+  int compute_gradient;
+
+  compute_gradient = ((flags & COMPUTE_GRADIENT) != 0);
+  if (xr == NULL || xi ==NULL || n1 < 0 || n2 < 0 || w1 < 0.0 || w2 < 0.0 || eps < 0.0 ||
+      (gxr == NULL && compute_gradient) || (gxi == NULL && compute_gradient)) {
+    return -1.0;
+  }
+  if ((flags & RGL_STORE_GRADIENT) != 0) {
+    memset(gxr, 0, n1*n2*sizeof(gxr[0]));
+    memset(gxi, 0, n1*n2*sizeof(gxi[0]));
+  }
+  fx = 0.0;
+  s = eps*eps;
+
+#define  XR(a1,a2)   xr[OFF2(a1,a2)]
+#define GXR(a1,a2)  gxr[OFF2(a1,a2)]
+#define  XI(a1,a2)   xi[OFF2(a1,a2)]
+#define GXI(a1,a2)  gxi[OFF2(a1,a2)]
+
+  if (METHOD(flags, RGL_TOTVAR_FORWARD)) {
+    /*
+     * The squared norm of the spatial gradient is the sum of the squared
+     * forward differences along each direction (standard discretization).
+     */
+
+    double y12r, y13r, y12i, y13i;
+    
+    if (compute_gradient) {
+      if (w1 == w2) /* same weights along all directions */ {
+        for (i2 = 1; i2 < n2; ++i2) {
+          x2r = XR(0, i2-1);
+          x2i = XI(0, i2-1);
+          for (i1 = 1; i1 < n1; ++i1) {
+            x1r = x2r;           x1i = x2i;
+            x2r = XR(i1, i2-1);  x2i = XI(i1, i2-1);
+            x3r = XR(i1-1, i2);  x3i = XI(i1-1, i2);
+            y12r = x1r - x2r;    y12i = x1i - x2i;
+            y13r = x1r - x3r;    y13i = x1i - x3i;
+            r = (SQ(y12r) + SQ(y13r) + SQ(y12i) + SQ(y13i))*w1;
+            p = sqrt(r + s);
+            fx += p;
+            p = w1/p;
+            y12r *= p;
+            y13r *= p;
+            y12i *= p;
+            y13i *= p;
+            GXR(i1 - 1, i2 - 1) += y12r + y13r; /* deriv. wrt X1 */
+            GXR(i1    , i2 - 1) -= y12r;       /* deriv. wrt X2 */
+            GXR(i1 - 1, i2    ) -= y13r;       /* deriv. wrt X3 */
+            GXI(i1 - 1, i2 - 1) += y12i + y13i; /* deriv. wrt X1 */
+            GXI(i1    , i2 - 1) -= y12i;       /* deriv. wrt X2 */
+            GXI(i1 - 1, i2    ) -= y13i;       /* deriv. wrt X3 */
+          }
+        }
+      } else /* not same weights along all directions */ {
+        for (i2 = 1; i2 < n2; ++i2) {
+          x2r = XR(0, i2-1);
+          x2i = XI(0, i2-1);
+          for (i1 = 1; i1 < n1; ++i1) {
+            x1r = x2r;           x1i = x2i;
+            x2r = XR(i1, i2-1);  x2i = XI(i1, i2-1);
+            x3r = XR(i1-1, i2);  x3i = XI(i1-1, i2);
+            y12r = x1r - x2r;    y12i = x1i - x2i;
+            y13r = x1r - x3r;    y13i = x1i - x3i;
+            r = SQ(y12r)*w1 + SQ(y13r)*w2 + SQ(y12i)*w1 + SQ(y13i)*w2;
+            p = sqrt(r + s);
+            fx += p;
+            p = 1.0/p;
+            y12r *= p*w1;
+            y13r *= p*w2;
+            y12i *= p*w1;
+            y13i *= p*w2;
+            GXR(i1 - 1, i2 - 1) += y12r + y13r; /* deriv. wrt X1 */
+            GXR(i1    , i2 - 1) -= y12r;       /* deriv. wrt X2 */
+            GXR(i1 - 1, i2    ) -= y13r;       /* deriv. wrt X3 */
+            GXI(i1 - 1, i2 - 1) += y12i + y13i; /* deriv. wrt X1 */
+            GXI(i1    , i2 - 1) -= y12i;       /* deriv. wrt X2 */
+            GXI(i1 - 1, i2    ) -= y13i;       /* deriv. wrt X3 */
+          }
+        }
+      }
+    } else /* do not compute gradients */ {
+      if (w1 == w2) /* same weights along all directions */ {
+        for (i2 = 1; i2 < n2; ++i2) {
+          x2r = XR(0, i2-1);
+          x2i = XI(0, i2-1);
+          for (i1 = 1; i1 < n1; ++i1) {
+            x1r = x2r;           x1i = x2i;
+            x2r = XR(i1, i2-1);  x2i = XI(i1, i2-1);
+            x3r = XR(i1-1, i2);  x3i = XI(i1-1, i2);
+            y12r = x1r - x2r;    y12i = x1i - x2i;
+            y13r = x1r - x3r;    y13i = x1i - x3i;
+            r = (SQ(y12r) + SQ(y13r) + SQ(y12i) + SQ(y13i))*w1;
+            fx += sqrt(r + s);
+          }
+        }
+      } else /* not same weights along all directions */ {
+        for (i2 = 1; i2 < n2; ++i2) {
+          x2r = XR(0, i2-1);
+          x2i = XI(0, i2-1);
+          for (i1 = 1; i1 < n1; ++i1) {
+            x1r = x2r;           x1i = x2i;
+            x2r = XR(i1, i2-1);  x2i = XI(i1, i2-1);
+            x3r = XR(i1-1, i2);  x3i = XI(i1-1, i2);
+            y12r = x1r - x2r;    y12i = x1i - x2i;
+            y13r = x1r - x3r;    y13i = x1i - x3i;
+            r = SQ(y12r)*w1 + SQ(y13r)*w2 + SQ(y12i)*w1 + SQ(y13i)*w2;
+            fx += sqrt(r + s);
+          }
+        }
+      }
+    }
+  
+  } else if (METHOD(flags, RGL_TOTVAR_ISOTROPIC)) {
+    /*
+     * Assume RGL_TOTVAR_ISOTROPIC.
+     *
+     * The squared norm of the spatial gradient is the sum of the
+     * squared differences along all the edges (divided by 2).
+     */
+
+    double y12r, y34r, y13r, y24r;
+    double y12i, y34i, y13i, y24i;
+
+    if (w1 == w2) /* same weights along all directions */ {
+      double q = w1/2.0;
+      if (compute_gradient) {
+        double p;
+        for (i2 = 1; i2 < n2; ++i2) {
+          j2 = OFF2(0, i2 - 1);
+          j4 = OFF2(0, i2);
+          x2r = xr[j2]; x2i = xi[j2]; 
+          x4r = xr[j4]; x4i = xi[j4];
+          for (i1 = 1; i1 < n1; ++i1) {
+            j1 = j2++;
+            j3 = j4++;
+            x1r = x2r;     x1i = x2i;
+            x2r = xr[j2];  x2i = xi[j2];
+            x3r = x4r;     x3i = x4i;
+            x4r = xr[j4];  x4i = xi[j4];
+            y12r = x1r - x2r;  y12i = x1i - x2i;
+            y34r = x3r - x4r;  y34i = x3i - x4i;
+            y13r = x1r - x3r;  y13i = x1i - x3i;
+            y24r = x2r - x4r;  y24i = x2i - x4i;
+            r = (SQ(y12r) + SQ(y34r) + SQ(y13r) + SQ(y24r) +
+                 SQ(y12i) + SQ(y34i) + SQ(y13i) + SQ(y24i))*q;
+            p = sqrt(r + s);
+            fx += p;
+            p = q/p;
+            gxr[j1] += (y12r + y13r)*p;
+            gxr[j2] -= (y12r - y24r)*p;
+            gxr[j3] += (y34r - y13r)*p;
+            gxr[j4] -= (y34r + y24r)*p;
+            gxi[j1] += (y12i + y13i)*p;
+            gxi[j2] -= (y12i - y24i)*p;
+            gxi[j3] += (y34i - y13i)*p;
+            gxi[j4] -= (y34i + y24i)*p;
+          }
+        }
+      } else /* do not compute gradient */ {
+        for (i2 = 1; i2 < n2; ++i2) {
+          j2 = OFF2(0, i2 - 1);
+          j4 = OFF2(0, i2);
+          x2r = xr[j2]; x2i = xi[j2];
+          x4r = xr[j4]; x4i = xi[j4];
+          for (i1 = 1; i1 < n1; ++i1) {
+            j2++;
+            j4++;
+            x1r = x2r;       x1i = x2i;
+            x2r = xr[j2];  x2i = xi[j2];
+            x3r = x4r;       x3i = x4i;
+            x4r = xr[j4];  x4i = xi[j4];
+            y12r = x1r - x2r;  y12i = x1i - x2i;
+            y34r = x3r - x4r;  y34i = x3i - x4i;
+            y13r = x1r - x3r;  y13i = x1i - x3i;
+            y24r = x2r - x4r;  y24i = x2i - x4i;
+            r = (SQ(y12r) + SQ(y34r) + SQ(y13r) + SQ(y24r) +
+                 SQ(y12i) + SQ(y34i) + SQ(y13i) + SQ(y24i))*q;
+            fx += sqrt(r + s);
+          }
+        }
+      }
+    } else /* not same weights along all directions */ {
+      double q1 = w1/2.0, q2 = w2/2.0;
+      if (compute_gradient) {
+        double p1, p2;
+        for (i2 = 1; i2 < n2; ++i2) {
+          j2 = OFF2(0, i2 - 1);
+          j4 = OFF2(0, i2);
+          x2r = xr[j2];  x2i = xi[j2];
+          x4r = xr[j4];  x4i = xi[j4];
+          for (i1 = 1; i1 < n1; ++i1) {
+            j1 = j2++;
+            j3 = j4++;
+            x1r = x2r;     x1i = x2i;
+            x2r = xr[j2];  x2i = xi[j2];
+            x3r = x4r;     x3i = x4i;
+            x4r = xr[j4];  x4i = xi[j4];
+            y12r = x1r - x2r;  y12i = x1i - x2i;
+            y34r = x3r - x4r;  y34i = x3i - x4i;
+            y13r = x1r - x3r;  y13i = x1i - x3i;
+            y24r = x2r - x4r;  y24i = x2i - x4i;
+            r = (SQ(y12r) + SQ(y34r))*q1 + (SQ(y13r) + SQ(y24r))*q2 +
+              (SQ(y12i) + SQ(y34i))*q1 + (SQ(y13i) + SQ(y24i))*q2;
+            r = sqrt(r + s);
+            fx += r;
+            r = 1.0/r;
+            p1 = r*q1;
+            p2 = r*q2;
+            y12r *= p1; y12i *= p1;
+            y34r *= p1; y34i *= p1;
+            y13r *= p2; y13i *= p2;
+            y24r *= p2; y24i *= p2;
+            gxr[j1] += y12r + y13r;
+            gxr[j2] -= y12r - y24r;
+            gxr[j3] += y34r - y13r;
+            gxr[j4] -= y34r + y24r;
+            gxi[j1] += y12i + y13i;
+            gxi[j2] -= y12i - y24i;
+            gxi[j3] += y34i - y13i;
+            gxi[j4] -= y34i + y24i;
+          }
+        }
+      } else /* do not compute gradient */ {
+        for (i2 = 1; i2 < n2; ++i2) {
+          j2 = OFF2(0, i2 - 1);
+          j4 = OFF2(0, i2);
+          x2r = xr[j2]; x2i = xi[j2];
+          x4r = xr[j4]; x4i = xi[j4];
+          for (i1 = 1; i1 < n1; ++i1) {
+            j2++;
+            j4++;
+            x1r = x2r;     x1i = x2i;
+            x2r = xr[j2];  x2i = xi[j2];
+            x3r = x4r;     x3i = x4i;
+            x4r = xr[j4];  x4i = xi[j4];
+            y12r = x1r - x2r;  y12i = x1i - x2i;
+            y34r = x3r - x4r;  y34i = x3i - x4i;
+            y13r = x1r - x3r;  y13i = x1i - x3i;
+            y24r = x2r - x4r;  y24i = x2i - x4i;
+            r = (SQ(y12r) + SQ(y34r))*q1 + (SQ(y13r) + SQ(y24r))*q2 +
+              (SQ(y12i) + SQ(y34i))*q1 + (SQ(y13i) + SQ(y24i))*q2;
+            fx += sqrt(r + s);
+          }
+        }
+      }
+    }
+  }
+
+#undef X
+#undef GX
+
+  /* Remove the "bias" and make sure the result is non-negative (it can only
+     be negative due to rounding errors). */
+  fx -= (n1 - 1)*(n2 - 1)*eps;
+  if (fx < 0.0) {
+    fx = 0.0;
+  }
+  return fx;
+}
 
 /*
  * NOTATIONS FOR 3-D VOLUME X(i1,i2,i3)
@@ -927,6 +1198,450 @@ double rgl_tv3d(const double x[],
               r = ((SQ(y12) + SQ(y34) + SQ(y56) + SQ(y78))*q1 +
                    (SQ(y13) + SQ(y24) + SQ(y57) + SQ(y68))*q2 +
                    (SQ(y15) + SQ(y26) + SQ(y37) + SQ(y48))*q3);
+              fx += sqrt(r + s);
+            }
+          }
+        }
+      }
+    }
+
+  }
+
+  /* Remove the "bias" and make sure the result is non-negative (it can only
+     be negative due to rounding errors). */
+  fx -= (n1 - 1)*(n2 - 1)*(n3 - 1)*eps;
+  if (fx < 0.0) {
+    fx = 0.0;
+  }
+  return fx;
+}
+
+/*
+ * NOTATIONS FOR 3-D VOLUME X(i1,i2,i3)
+ *
+ *                 i3  i2
+ *                  | /
+ *                  |/              X1 = X(i1-1,i2-1,i3-1)
+ *        X7--------X8---> i1       X2 = X(i1  ,i2-1,i3-1)
+ *       /:        /|               X3 = X(i1-1,i2  ,i3-1)
+ *      / :       / |               X4 = X(i1  ,i2  ,i3-1)
+ *     X5--------X6 |               X5 = X(i1-1,i2-1,i3  )
+ *     |  X3.....|..X4              X6 = X(i1  ,i2-1,i3  )
+ *     | '       | /                X7 = X(i1-1,i2  ,i3  )
+ *     |'        |/                 X8 = X(i1  ,i2  ,i3  )
+ *     X1--------X2
+ *
+ */
+double rgl_tv3d_complex(const double xr[], const double xi[],
+                const long n1, const long n2, const long n3,
+                const double w1, const double w2, const double w3,
+                const double eps, double gxr[], double gxi[], unsigned int flags)
+{
+  double x1r, x2r, x3r, x4r, x5r, x6r, x7r, x8r;
+  double x1i, x2i, x3i, x4i, x5i, x6i, x7i, x8i;
+  double r, s, fx;
+  double y12r, y34r, y56r, y78r;
+  double y13r, y24r, y57r, y68r;
+  double y15r, y26r, y37r, y48r;
+  double y12i, y34i, y56i, y78i;
+  double y13i, y24i, y57i, y68i;
+  double y15i, y26i, y37i, y48i;
+  long i1, i2, i3;
+  long j1, j2, j3, j4, j5, j6, j7, j8;
+  int compute_gradient;
+
+  compute_gradient = ((flags & COMPUTE_GRADIENT) != 0);
+  if (xr == NULL || xi == NULL || n1 < 0 || n2 < 0 || n3 < 0 ||
+      w1 < 0.0 || w2 < 0.0 || w3 < 0.0 || eps < 0.0 ||
+      (gxr == NULL && compute_gradient) || (gxi == NULL && compute_gradient)) {
+    return -1.0;
+  }
+  if ((flags & RGL_STORE_GRADIENT) != 0) {
+    memset(gxr, 0, n1*n2*n3*sizeof(gxr[0]));
+    memset(gxi, 0, n1*n2*n3*sizeof(gxi[0]));
+  }
+  fx = 0.0;
+  s = eps*eps;
+
+  if (METHOD(flags, RGL_TOTVAR_FORWARD)) {
+
+    /*
+     * The squared norm of the spatial gradient is the sum of the squared
+     * forward differences along each direction (standard discretization).
+     */
+
+    if (w1 == w2 && w2 == w3) /* same weights along all directions */ {
+      double p, q = w1;
+      if (compute_gradient) {
+        for (i3 = 1; i3 < n3; ++i3) {
+          for (i2 = 1; i2 < n2; ++i2) {
+            j2 = OFF3(0, i2-1, i3-1);
+            j3 = OFF3(0, i2,   i3-1);
+            j5 = OFF3(0, i2-1, i3);
+            x2r = xr[j2];
+            x2i = xi[j2];
+            for (i1 = 1; i1 < n1; ++i1) {
+              /* Peak the values at 4 corners of the cube */
+              j1 = j2++;
+              x1r = x2r;  x1i = x2i;
+              x2r = xr[j2];  x2i = xi[j2];
+              x3r = xr[j3];  x3i = xi[j3];
+              x5r = xr[j5];  x5i = xi[j5];
+              /* Compute the differences along the 3 directions: */
+              y12r = x1r - x2r;  y12i = x1i - x2i;
+              y13r = x1r - x3r;  y13i = x1i - x3i;
+              y15r = x1r - x5r;  y15i = x1i - x5i;
+              /* Compute the cost and integrate its gradient. */
+              r = (SQ(y12r) + SQ(y13r) + SQ(y15r) + SQ(y12i) + SQ(y13i) + SQ(y15i))*q;
+              p = sqrt(r + s);
+              fx += p;
+              p = q/p;
+              gxr[j1] += (y12r + y13r + y15r)*p;
+              gxr[j2] -= y12r*p;
+              gxr[j3] -= y13r*p;
+              gxr[j5] -= y15r*p;
+              gxi[j1] += (y12i + y13i + y15i)*p;
+              gxi[j2] -= y12i*p;
+              gxi[j3] -= y13i*p;
+              gxi[j5] -= y15i*p;
+              ++j3;
+              ++j5;
+            }
+          }
+        }
+      } else /* do not compute gradients */ {
+        for (i3 = 1; i3 < n3; ++i3) {
+          for (i2 = 1; i2 < n2; ++i2) {
+            j2 = OFF3(0, i2-1, i3-1);
+            j3 = OFF3(0, i2,   i3-1);
+            j5 = OFF3(0, i2-1, i3);
+            x2r = xr[j2];
+            for (i1 = 1; i1 < n1; ++i1) {
+              /* Peak the values at 4 corners of the cube */
+              x1r = x2r;  x1i = x2i;
+              x2r = xr[++j2];  x2i = xi[++j2];
+              x3r = xr[j3++];  x3i = xi[j3++];
+              x5r = xr[j5++];  x5i = xi[j5++];
+              /* Compute the differences along the 3 directions: */
+              y12r = x1r - x2r;  y12i = x1i - x2i;
+              y13r = x1r - x3r;  y13i = x1i - x3i;
+              y15r = x1r - x5r;  y15i = x1i - x5i;
+              /* Compute the cost and integrate its gradient. */
+              r = (SQ(y12r) + SQ(y13r) + SQ(y15r) + SQ(y12i) + SQ(y13i) + SQ(y15i))*q;
+              fx += sqrt(r + s);
+            }
+          }
+        }
+      }
+    } else /* not same weights along all directions */ {
+      double q1 = w1;
+      double q2 = w2;
+      double q3 = w3;
+      if (compute_gradient) {
+        for (i3 = 1; i3 < n3; ++i3) {
+          for (i2 = 1; i2 < n2; ++i2) {
+            j2 = OFF3(0, i2-1, i3-1);
+            j3 = OFF3(0, i2,   i3-1);
+            j5 = OFF3(0, i2-1, i3);
+            x2r = xr[j2];
+            x2i = xi[j2];
+            for (i1 = 1; i1 < n1; ++i1) {
+              /* Peak the values at 4 corners of the cube */
+              j1 = j2++;
+              x1r = x2r;  x1i = x2i;
+              x2r = xr[j2];  x2i = xi[j2];
+              x3r = xr[j3];  x3i = xi[j3];
+              x5r = xr[j5];  x5i = xi[j5];
+              /* Compute the differences along the 3 directions: */
+              y12r = x1r - x2r;  y12i = x1i - x2i;
+              y13r = x1r - x3r;  y13i = x1i - x3i;
+              y15r = x1r - x5r;  y15i = x1i - x5i;
+              /* Compute the cost and integrate its gradient. */
+              r =  SQ(y12r)*q1 + SQ(y13r)*q2 + SQ(y15r)*q3 + SQ(y12i)*q1 + SQ(y13i)*q2 + SQ(y15i)*q3;
+              r = sqrt(r + s);
+              fx += r;
+              r = 1.0/r;
+              y12r *= r*q1;  y12i *= r*q1;
+              y13r *= r*q2;  y13i *= r*q2;
+              y15r *= r*q3;  y15i *= r*q3;
+              gxr[j1] += y12r + y13r + y15r;
+              gxr[j2] -= y12r;
+              gxr[j3] -= y13r;
+              gxr[j5] -= y15r;
+              gxi[j1] += y12i + y13i + y15i;
+              gxi[j2] -= y12i;
+              gxi[j3] -= y13i;
+              gxi[j5] -= y15i;
+              ++j3;
+              ++j5;
+            }
+          }
+        }
+      } else /* do not compute gradients */ {
+        for (i3 = 1; i3 < n3; ++i3) {
+          for (i2 = 1; i2 < n2; ++i2) {
+            j2 = OFF3(0, i2-1, i3-1);
+            j3 = OFF3(0, i2,   i3-1);
+            j5 = OFF3(0, i2-1, i3);
+            x2r = xr[j2];
+            x2i = xi[j2];
+            for (i1 = 1; i1 < n1; ++i1) {
+              /* Peak the values at the 8 corners of the cube */
+              x1r = x2r;       x1i = x2i;
+              x2r = xr[++j2];  x2i = xi[++j2];
+              x3r = xr[j3++];  x3i = xi[j3++];
+              x5r = xr[j5++];  x5i = xi[j5++];
+              /* Compute the differences along the 3 directions: */
+              y12r = x1r - x2r;  y12i = x1i - x2i;
+              y13r = x1r - x3r;  y13i = x1i - x3i;
+              y15r = x1r - x5r;  y15i = x1i - x5i;
+              /* Compute the cost and integrate its gradient. */
+              r = SQ(y12r)*q1 + SQ(y13r)*q2 + SQ(y15r)*q3 + SQ(y12i)*q1 + SQ(y13i)*q2 + SQ(y15i)*q3;
+              fx += sqrt(r + s);
+            }
+          }
+        }
+      }
+    }
+
+  } else if (METHOD(flags, RGL_TOTVAR_ISOTROPIC)) {
+
+    /*
+     * The squared norm of the spatial gradient is the sum of the squared
+     * differences along all egdes of the 2x2x2 cube divided by 4 (isotropic
+     * definition).
+     */
+
+    if (w1 == w2 && w2 == w3) /* same weights along all directions */ {
+      double p, q = w1/4.0;
+      if (compute_gradient) {
+        for (i3 = 1; i3 < n3; ++i3) {
+          for (i2 = 1; i2 < n2; ++i2) {
+            j8 = OFF3(0, i2,   i3);
+            j6 = OFF3(0, i2-1, i3);
+            j4 = OFF3(0, i2,   i3-1);
+            j2 = OFF3(0, i2-1, i3-1);
+            x2r = xr[j2]; x2i = xi[j2]; 
+            x4r = xr[j4]; x4i = xi[j4];
+            x6r = xr[j6]; x6i = xi[j6];
+            x8r = xr[j8]; x8i = xi[j8];
+            for (i1 = 1; i1 < n1; ++i1) {
+              /* Peak the values at the 8 corners of the cube */
+              j1 = j2++; x1r = x2r; x2r = xr[j2]; x1i = x2i; x2i = xi[j2];
+              j3 = j4++; x3r = x4r; x4r = xr[j4]; x3i = x4i; x4i = xi[j4];
+              j5 = j6++; x5r = x6r; x6r = xr[j6]; x5i = x6i; x6i = xi[j6];
+              j7 = j8++; x7r = x8r; x8r = xr[j8]; x7i = x8i; x8i = xi[j8];
+              /* Compute the differences along all the 12 edges of the cube: */
+              /*  - along 1st dim: */
+              y12r = x1r - x2r; y12i = x1i - x2i;
+              y34r = x3r - x4r; y34i = x3i - x4i;
+              y56r = x5r - x6r; y56i = x5i - x6i;
+              y78r = x7r - x8r; y78i = x7i - x8i;
+              /*  - along 2nd dim: */
+              y13r = x1r - x3r; y13i = x1i - x3i;
+              y24r = x2r - x4r; y24i = x2i - x4i;
+              y57r = x5r - x7r; y57i = x5i - x7i;
+              y68r = x6r - x8r; y68i = x6i - x8i;
+              /*  - along 3rd dim: */
+              y15r = x1r - x5r; y15i = x1i - x5i;
+              y26r = x2r - x6r; y26i = x2i - x6i;
+              y37r = x3r - x7r; y37i = x3i - x7i;
+              y48r = x4r - x8r; y48i = x4i - x8i;
+              /* Compute the cost and integrate its gradient. */
+              r = (SQ(y12r) + SQ(y34r) + SQ(y56r) + SQ(y78r) +
+                   SQ(y13r) + SQ(y24r) + SQ(y57r) + SQ(y68r) +
+                   SQ(y15r) + SQ(y26r) + SQ(y37r) + SQ(y48r) +
+                   SQ(y12i) + SQ(y34i) + SQ(y56i) + SQ(y78i) +
+                   SQ(y13i) + SQ(y24i) + SQ(y57i) + SQ(y68i) +
+                   SQ(y15i) + SQ(y26i) + SQ(y37i) + SQ(y48i))*q;
+              p = sqrt(r + s);
+              fx += p;
+              p = q/p;
+              gxr[j1] += (y12r + y13r + y15r)*p;
+              gxr[j2] -= (y12r - y24r - y26r)*p;
+              gxr[j3] += (y34r - y13r + y37r)*p;
+              gxr[j4] -= (y34r + y24r - y48r)*p;
+              gxr[j5] += (y56r + y57r - y15r)*p;
+              gxr[j6] -= (y56r - y68r + y26r)*p;
+              gxr[j7] += (y78r - y57r - y37r)*p;
+              gxr[j8] -= (y78r + y68r + y48r)*p;
+              gxi[j1] += (y12i + y13i + y15i)*p;
+              gxi[j2] -= (y12i - y24i - y26i)*p;
+              gxi[j3] += (y34i - y13i + y37i)*p;
+              gxi[j4] -= (y34i + y24i - y48i)*p;
+              gxi[j5] += (y56i + y57i - y15i)*p;
+              gxi[j6] -= (y56i - y68i + y26i)*p;
+              gxi[j7] += (y78i - y57i - y37i)*p;
+              gxi[j8] -= (y78i + y68i + y48i)*p;
+            }
+          }
+        }
+      } else /* do not compute gradients */ {
+        for (i3 = 1; i3 < n3; ++i3) {
+          for (i2 = 1; i2 < n2; ++i2) {
+            j8 = OFF3(0, i2,   i3);
+            j6 = OFF3(0, i2-1, i3);
+            j4 = OFF3(0, i2,   i3-1);
+            j2 = OFF3(0, i2-1, i3-1);
+            x2r = xr[j2]; x2i = xi[j2]; 
+            x4r = xr[j4]; x4i = xi[j4];
+            x6r = xr[j6]; x6i = xi[j6];
+            x8r = xr[j8]; x8i = xi[j8];
+            for (i1 = 1; i1 < n1; ++i1) {
+              /* Peak the values at the 8 corners of the cube */
+              x1r = x2r; x2r = xr[++j2]; x1i = x2i; x2i = xi[++j2];
+              x3r = x4r; x4r = xr[++j4]; x3i = x4i; x4i = xi[++j4];
+              x5r = x6r; x6r = xr[++j6]; x5i = x6i; x6i = xi[++j6];
+              x7r = x8r; x8r = xr[++j8]; x7i = x8i; x8i = xi[++j8];
+              /* Compute the differences along all the 12 edges of the cube: */
+              /*  - along 1st dim: */
+              y12r = x1r - x2r; y12i = x1i - x2i;
+              y34r = x3r - x4r; y34i = x3i - x4i;
+              y56r = x5r - x6r; y56i = x5i - x6i;
+              y78r = x7r - x8r; y78i = x7i - x8i;
+              /*  - along 2nd dim: */
+              y13r = x1r - x3r; y13i = x1i - x3i;
+              y24r = x2r - x4r; y24i = x2i - x4i;
+              y57r = x5r - x7r; y57i = x5i - x7i;
+              y68r = x6r - x8r; y68i = x6i - x8i;
+              /*  - along 3rd dim: */
+              y15r = x1r - x5r; y15i = x1i - x5i;
+              y26r = x2r - x6r; y26i = x2i - x6i;
+              y37r = x3r - x7r; y37i = x3i - x7i;
+              y48r = x4r - x8r; y48i = x4i - x8i;
+              /* Compute the cost. */
+              r = (SQ(y12r) + SQ(y34r) + SQ(y56r) + SQ(y78r) +
+                   SQ(y13r) + SQ(y24r) + SQ(y57r) + SQ(y68r) +
+                   SQ(y15r) + SQ(y26r) + SQ(y37r) + SQ(y48r) +
+                   SQ(y12i) + SQ(y34i) + SQ(y56i) + SQ(y78i) +
+                   SQ(y13i) + SQ(y24i) + SQ(y57i) + SQ(y68i) +
+                   SQ(y15i) + SQ(y26i) + SQ(y37i) + SQ(y48i))*q;
+              fx += sqrt(r + s);
+            }
+          }
+        }
+      }
+    } else /* not same weights along all directions */ {
+      double p1, q1 = w1/4.0;
+      double p2, q2 = w2/4.0;
+      double p3, q3 = w3/4.0;
+      if (compute_gradient) {
+        for (i3 = 1; i3 < n3; ++i3) {
+          for (i2 = 1; i2 < n2; ++i2) {
+            j8 = OFF3(0, i2,   i3);
+            j6 = OFF3(0, i2-1, i3);
+            j4 = OFF3(0, i2,   i3-1);
+            j2 = OFF3(0, i2-1, i3-1);
+            x2r = xr[j2]; x2i = xi[j2]; 
+            x4r = xr[j4]; x4i = xi[j4];
+            x6r = xr[j6]; x6i = xi[j6];
+            x8r = xr[j8]; x8i = xi[j8];
+            for (i1 = 1; i1 < n1; ++i1) {
+              /* Peak the values at the 8 corners of the cube. */
+              j1 = j2++; x1r = x2r; x2r = xr[j2]; x1i = x2i; x2i = xi[j2];
+              j3 = j4++; x3r = x4r; x4r = xr[j4]; x3i = x4i; x4i = xi[j4];
+              j5 = j6++; x5r = x6r; x6r = xr[j6]; x5i = x6i; x6i = xi[j6];
+              j7 = j8++; x7r = x8r; x8r = xr[j8]; x7i = x8i; x8i = xi[j8];
+              /* Compute the differences along all the 12 edges of the cube: */
+              /*  - along 1st dim: */
+              y12r = x1r - x2r; y12i = x1i - x2i;
+              y34r = x3r - x4r; y34i = x3i - x4i;
+              y56r = x5r - x6r; y56i = x5i - x6i;
+              y78r = x7r - x8r; y78i = x7i - x8i;
+              /*  - along 2nd dim: */
+              y13r = x1r - x3r; y13i = x1i - x3i;
+              y24r = x2r - x4r; y24i = x2i - x4i;
+              y57r = x5r - x7r; y57i = x5i - x7i;
+              y68r = x6r - x8r; y68i = x6i - x8i;
+              /*  - along 3rd dim: */
+              y15r = x1r - x5r; y15i = x1i - x5i;
+              y26r = x2r - x6r; y26i = x2i - x6i;
+              y37r = x3r - x7r; y37i = x3i - x7i;
+              y48r = x4r - x8r; y48i = x4i - x8i;
+              /* Compute the cost and integrate its gradient. */
+              r = ((SQ(y12r) + SQ(y34r) + SQ(y56r) + SQ(y78r))*q1 +
+                   (SQ(y13r) + SQ(y24r) + SQ(y57r) + SQ(y68r))*q2 +
+                   (SQ(y15r) + SQ(y26r) + SQ(y37r) + SQ(y48r))*q3 +
+                   (SQ(y12i) + SQ(y34i) + SQ(y56i) + SQ(y78i))*q1 +
+                   (SQ(y13i) + SQ(y24i) + SQ(y57i) + SQ(y68i))*q2 +
+                   (SQ(y15i) + SQ(y26i) + SQ(y37i) + SQ(y48i))*q3);
+              r = sqrt(r + s);
+              fx += r;
+              r = 1.0/r;
+              p1 = r*q1;
+              p2 = r*q2;
+              p3 = r*q3;
+              y12r *= p1; y12i *= p1;
+              y34r *= p1; y34i *= p1;
+              y56r *= p1; y56i *= p1;
+              y78r *= p1; y78i *= p1;
+              y13r *= p2; y13i *= p2;
+              y24r *= p2; y24i *= p2;
+              y57r *= p2; y57i *= p2;
+              y68r *= p2; y68i *= p2;
+              y15r *= p3; y15i *= p3;
+              y26r *= p3; y26i *= p3;
+              y37r *= p3; y37i *= p3;
+              y48r *= p3; y48i *= p3;
+              gxr[j1] += y12r + y13r + y15r;
+              gxr[j2] -= y12r - y24r - y26r;
+              gxr[j3] += y34r - y13r + y37r;
+              gxr[j4] -= y34r + y24r - y48r;
+              gxr[j5] += y56r + y57r - y15r;
+              gxr[j6] -= y56r - y68r + y26r;
+              gxr[j7] += y78r - y57r - y37r;
+              gxr[j8] -= y78r + y68r + y48r;
+              gxi[j1] += y12i + y13i + y15i;
+              gxi[j2] -= y12i - y24i - y26i;
+              gxi[j3] += y34i - y13i + y37i;
+              gxi[j4] -= y34i + y24i - y48i;
+              gxi[j5] += y56i + y57i - y15i;
+              gxi[j6] -= y56i - y68i + y26i;
+              gxi[j7] += y78i - y57i - y37i;
+              gxi[j8] -= y78i + y68i + y48i;
+            }
+          }
+        }
+      } else /* do not compute gradients */ {
+        for (i3 = 1; i3 < n3; ++i3) {
+          for (i2 = 1; i2 < n2; ++i2) {
+            j8 = OFF3(0, i2,   i3);
+            j6 = OFF3(0, i2-1, i3);
+            j4 = OFF3(0, i2,   i3-1);
+            j2 = OFF3(0, i2-1, i3-1);
+            x2r = xr[j2]; x2i = xi[j2]; 
+            x4r = xr[j4]; x4i = xi[j4];
+            x6r = xr[j6]; x6i = xi[j6];
+            x8r = xr[j8]; x8i = xi[j8];
+            for (i1 = 1; i1 < n1; ++i1) {
+              /* Peak the values at the 8 corners of the cube. */
+              j1 = j2++; x1r = x2r; x2r = xr[j2]; x1i = x2i; x2i = xi[j2];
+              j3 = j4++; x3r = x4r; x4r = xr[j4]; x3i = x4i; x4i = xi[j4];
+              j5 = j6++; x5r = x6r; x6r = xr[j6]; x5i = x6i; x6i = xi[j6];
+              j7 = j8++; x7r = x8r; x8r = xr[j8]; x7i = x8i; x8i = xi[j8];
+              /* Compute the differences along all the 12 edges of the cube: */
+              /*  - along 1st dim: */
+              y12r = x1r - x2r; y12i = x1i - x2i;
+              y34r = x3r - x4r; y34i = x3i - x4i;
+              y56r = x5r - x6r; y56i = x5i - x6i;
+              y78r = x7r - x8r; y78i = x7i - x8i;
+              /*  - along 2nd dim: */
+              y13r = x1r - x3r; y13i = x1i - x3i;
+              y24r = x2r - x4r; y24i = x2i - x4i;
+              y57r = x5r - x7r; y57i = x5i - x7i;
+              y68r = x6r - x8r; y68i = x6i - x8i;
+              /*  - along 3rd dim: */
+              y15r = x1r - x5r; y15i = x1i - x5i;
+              y26r = x2r - x6r; y26i = x2i - x6i;
+              y37r = x3r - x7r; y37i = x3i - x7i;
+              y48r = x4r - x8r; y48i = x4i - x8i;
+              /* Compute the cost and integrate its gradient. */
+              r = ((SQ(y12r) + SQ(y34r) + SQ(y56r) + SQ(y78r))*q1 +
+                   (SQ(y13r) + SQ(y24r) + SQ(y57r) + SQ(y68r))*q2 +
+                   (SQ(y15r) + SQ(y26r) + SQ(y37r) + SQ(y48r))*q3 +
+                   (SQ(y12i) + SQ(y34i) + SQ(y56i) + SQ(y78i))*q1 +
+                   (SQ(y13i) + SQ(y24i) + SQ(y57i) + SQ(y68i))*q2 +
+                   (SQ(y15i) + SQ(y26i) + SQ(y37i) + SQ(y48i))*q3);
               fx += sqrt(r + s);
             }
           }
