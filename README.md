@@ -1,7 +1,7 @@
 # YTotVar - Edge preserving regularization for Yorick
 
 This plug-in implements relaxed total variation (TV) and edge-preserving
-regularization for [Yorick](http://yorick.github.com/) in 2-D, 3-D or 4-D.
+regularization for [Yorick](http://github.com/LLNL/yorick/) in 2-D, 3-D or 4-D.
 
 
 ## Installation
